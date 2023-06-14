@@ -8,6 +8,7 @@ def fetch_data_from_apis(api_url):
     if response.status_code==200:
         return response.json()
     else:
+        # Raise an exception with an informative error message
         raise Exception('API request failed with status code:',response.status_code)
 
 # Define the API URLs with names
