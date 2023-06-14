@@ -3,14 +3,12 @@ from pyspark.sql import SparkSession
 
 def fetch_data_from_apis(api_url):
 
-    try:
-        response = requests.get(api_url)
-        response.raise_for_status()  # Raise an exception for non-200 status codes
+    response = requests.get(api_url)
+    
+    if response.status_code==200:
         return response.json()
-    except requests.exceptions.RequestException as e:
-        status_code = response.status_code
-        error_message = f"API request failed with status code: {status_code}"
-        raise Exception(error_message) from e
+    else:
+        raise Exception('API request failed with status code:',response.status_code)
 
 # Define the API URLs with names
 api_urls = {
