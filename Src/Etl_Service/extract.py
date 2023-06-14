@@ -1,5 +1,15 @@
-from Apis import fetch_data_from_apis, api_urls
+import requests
 from pyspark.sql import SparkSession
+
+def fetch_data_from_apis(api_url):
+
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()  # Raise an exception for non-200 status codes
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print("An error occurred:", e)
+        return None
 
 def extract():
     
@@ -10,21 +20,18 @@ def extract():
         
     spark = SparkSession.builder.getOrCreate()
 
-    df1 = spark.createDataFrame(data["Appointment_API"])
-    df2 = spark.createDataFrame(data["Councillor_API"])
-    df3 = spark.createDataFrame(data["Patient_Councillor_API"])
-    df4 = spark.createDataFrame(data["Rating_API"])
+    df1 = spark.createDataFrame(data["appointment_api"])
+    df2 = spark.createDataFrame(data["councillor_api"])
+    df3 = spark.createDataFrame(data["patient_councillor_api"])
+    df4 = spark.createDataFrame(data["rating_api"])
 
     return df1, df2, df3, df4
     spark.stop()
 
-def fetch_all_data():
-    
-    df1, df2, df3, df4 = extract()
-    return df1, df2, df3, df4
-
-    # Show the dataframes
-    df1.show(2)
-    df2.show(2)
-    df3.show(2)
-    df4.show(2)
+# Define the API URLs with names
+api_urls = {
+    "appointment_api": "https://xloop-dummy.herokuapp.com/appointment",
+    "councillor_api": "https://xloop-dummy.herokuapp.com/councillor",
+    "patient_councillor_api": "https://xloop-dummy.herokuapp.com/patient_councillor",
+    "rating_api": "https://xloop-dummy.herokuapp.com/rating"
+}
