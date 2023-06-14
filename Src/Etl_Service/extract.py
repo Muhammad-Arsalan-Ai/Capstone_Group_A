@@ -8,8 +8,9 @@ def fetch_data_from_apis(api_url):
         response.raise_for_status()  # Raise an exception for non-200 status codes
         return response.json()
     except requests.exceptions.RequestException as e:
-        print("An error occurred:", e)
-        return None
+        status_code = response.status_code
+        error_message = f"API request failed with status code: {status_code}"
+        raise Exception(error_message) from e
 
 # Define the API URLs with names
 api_urls = {
