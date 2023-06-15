@@ -2,10 +2,13 @@
 FROM python:3.9
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /home/app/
 
 # Copy the code files to the container
-COPY . /app
+COPY ./ /home/app/
+
+# update the apt & Install the required dependencies openjdk-11-jdk
+RUN  apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk 
 
 # Install the required dependencies from requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
