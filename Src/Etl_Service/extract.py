@@ -1,21 +1,29 @@
-#requests library is necessary for making HTTP requests
-import requests
+import os
 
-def fetch_data_from_apis(api_url):
-    
-    #Function to fetch data from the specified API URL
-    response = requests.get(api_url)
-    
-    if response.status_code==200:
-        return response.json() # Return JSON data for successful API request
+import requests  # type: ignore
+from base_logger import logger
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+def get_api_data(url: str):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
     else:
-        # Raise an exception with an informative error message
-        raise Exception('API request failed with status code:',response.status_code)
+        err_msg = f"Error {response.status_code} occurred while accessing {url}"
+        logger.error(err_msg)
+        response.raise_for_status()
 
-# Define the API URLs with names
-api_urls = {
-    "appointment_api": "https://xloop-dummy.herokuapp.com/appointment",
-    "councillor_api": "https://xloop-dummy.herokuapp.com/councillor",
-    "patient_councillor_api": "https://xloop-dummy.herokuapp.com/patient_councillor",
-    "rating_api": "https://xloop-dummy.herokuapp.com/rating"
+
+urls = {
+    "appointment": f"{os.getenv('BASE_URL')}/appointment",
+    "councillor": f"{os.getenv('BASE_URL')}/councillor",
+    "patient_councillor": f"{os.getenv('BASE_URL')}/patient_councillor",
+    "rating": f"{os.getenv('BASE_URL')}/rating",
 }
+
+
+if __name__ == "__main__":
+    urls = {key: get_api_data(val) for key, val in urls.items()}
