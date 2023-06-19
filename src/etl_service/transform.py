@@ -47,35 +47,39 @@ def join():
 
 def calculate_average():
     """
-    Calculates the average rating for each specialization based on the joined dataframe.
+    Calculates the average rating for each councillor in each specialization based on the joined dataframe.
 
-    Returns a dataframe containing the specialization, a list of councillor IDs, and the average ratings.
+    Returns a dictionary of DataFrame tables, where each table represents the average rating for each councillor
+    within a specialization. The tables are indexed by the specialization name.
 
     Preconditions:
-    - The `join()` function should be called prior to invoking this function to obtain the joined dataframe.
+    - The join() function should be called prior to invoking this function to obtain the joined dataframe.
 
-    Postconditions:
-    - Returns a dataframe with the following columns:
-        - 'specialization': The specialization of the councillors.
-        - 'councillor_ids': A list of councillor IDs associated with the specialization.
-        - 'average_value': A list of average ratings per specialization.
-
+    Parameters:
+    - Returns a dictionary of DataFrame tables with the following columns:
+        - 'councillor_id': The ID of the councillor.
+        - 'average_value': The average rating for the councillor within the specialization.
 
     """
     joined_df = join()
 
-    # Group by specialization and calculate the average rating
-    average_df = (
-        joined_df.groupBy("specialization")
-        .agg(
-            F.collect_set("councillor_id").alias("councillor_ids"),
-            F.collect_list("value").alias("average_value"),
-        )
-        .withColumn(
-            "average_value", F.expr("transform(average_value, x -> CAST(x AS FLOAT))")
-        )
-        .withColumn("average_value", F.sort_array("average_value", asc=False))
-        .orderBy("specialization")
-    )
+    specializations = joined_df.select("specialization").distinct().collect()
 
-    return average_df
+    specialization_tables = {}
+
+    for specialization_row in specializations:
+        specialization = specialization_row["specialization"]
+
+        filtered_df = joined_df.filter(joined_df["specialization"] == specialization)
+
+        average_df = (
+            filtered_df.groupBy("councillor_id")
+            .agg(F.avg("value").alias("average_value"))
+            .orderBy(F.desc("average_value"))
+        )
+
+        average_df = average_df.drop("specialization")
+
+        specialization_tables[specialization] = average_df
+
+    return specialization_tables
