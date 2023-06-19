@@ -20,12 +20,12 @@ def fetch_all_data():
     """
     spark = SparkSession.builder.getOrCreate()
 
-    appointment_df = spark.createDataFrame(get_api_data(urls["appointment"]))
-    councillor_df = spark.createDataFrame(get_api_data(urls["councillor"]))
+    appointment_df = spark.createDataFrame(spark, get_api_data, urls["appointment"])
+    councillor_df = spark.createDataFrame(spark, get_api_data, urls["councillor"])
     patient_councillor_df = spark.createDataFrame(
-        get_api_data(urls["patient_councillor"])
+        spark, get_api_data, urls["patient_councillor"]
     )
-    rating_df = spark.createDataFrame(get_api_data(urls["rating"]))
+    rating_df = spark.createDataFrame(spark, get_api_data, urls["rating"])
 
     return appointment_df, councillor_df, patient_councillor_df, rating_df
 
