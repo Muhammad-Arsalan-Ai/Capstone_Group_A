@@ -2,6 +2,29 @@ from extract import get_api_data, urls
 from pyspark.sql import functions as F
 
 
+def fetch_all_data():
+    """
+    Fetches data from the specified API URLs and returns the corresponding dataframes.
+
+    Returns:
+    - appointment_df: DataFrame containing appointment data.
+    - councillor_df: DataFrame containing councillor data.
+    - patient_councillor_df: DataFrame containing patient-councillor relationship data.
+    - rating_df: DataFrame containing rating data.
+
+    Preconditions:
+    - The get_api_data() function should be implemented to fetch data from the API URLs.
+    - The urls dictionary should contain the appropriate API URLs.
+
+    """
+    appointment_df = get_api_data(urls["appointment"])
+    councillor_df = get_api_data(urls["councillor"])
+    patient_councillor_df = get_api_data(urls["patient_councillor"])
+    rating_df = get_api_data(urls["rating"])
+
+    return appointment_df, councillor_df, patient_councillor_df, rating_df
+
+
 def join():
     """
     Performs data joining based on appointment, councillor, patient-councillor, and rating dataframes.
@@ -20,10 +43,7 @@ def join():
         - 'value': The rating value associated with the appointment.
 
     """
-    appointment_df = get_api_data(urls["appointment"])
-    councillor_df = get_api_data(urls["councillor"])
-    patient_councillor_df = get_api_data(urls["patient_councillor"])
-    rating_df = get_api_data(urls["rating"])
+    appointment_df, councillor_df, patient_councillor_df, rating_df = fetch_all_data()
 
     joined_df = (
         appointment_df.join(
@@ -35,7 +55,7 @@ def join():
             councillor_df, councillor_df["id"] == patient_councillor_df["councillor_id"]
         )
         .select(
-            appointment_df["patient_id"],
+            # appointment_df["patient_id"],
             councillor_df["id"].alias("councillor_id"),
             councillor_df["specialization"],
             rating_df["value"],
@@ -76,9 +96,8 @@ def calculate_average():
             filtered_df.groupBy("councillor_id")
             .agg(F.avg("value").alias("average_value"))
             .orderBy(F.desc("average_value"))
+            .drop("specialization")
         )
-
-        average_df = average_df.drop("specialization")
 
         specialization_tables[specialization] = average_df
 
