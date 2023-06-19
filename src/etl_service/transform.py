@@ -33,8 +33,9 @@ def fetch_all_data():
         data = get_api_data(url)
         dataframes[key] = spark.createDataFrame(data)
 
-    spark.stop()
     logger.info("Data received from endpoints")
+    spark.stop()
+
     return dataframes['appointment'], dataframes['councillor'], dataframes['patient_councillor'], dataframes['rating']
 
 
