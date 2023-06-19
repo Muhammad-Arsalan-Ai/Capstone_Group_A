@@ -1,4 +1,5 @@
 from extract import get_api_data, urls
+from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
 
@@ -17,10 +18,17 @@ def fetch_all_data():
     - The urls dictionary should contain the appropriate API URLs.
 
     """
-    appointment_df = get_api_data(urls["appointment"])
-    councillor_df = get_api_data(urls["councillor"])
-    patient_councillor_df = get_api_data(urls["patient_councillor"])
-    rating_df = get_api_data(urls["rating"])
+    data = {}
+
+    for k, v in urls.items():
+        data[k] = get_api_data(v)
+
+    spark = SparkSession.builder.getOrCreate()
+
+    appointment_df = spark.createDataFrame(data["appointment"])
+    councillor_df = spark.createDataFrame(data["councillor"])
+    patient_councillor_df = spark.createDataFrame(data["patient_councillor"])
+    rating_df = spark.createDataFrame(data["rating"])
 
     return appointment_df, councillor_df, patient_councillor_df, rating_df
 
@@ -32,17 +40,15 @@ def join():
     Returns a joined dataframe containing patient ID, councillor ID, councillor specialization, and rating value.
 
     Preconditions:
-    - The `get_api_data()` function should be implemented and accessible to retrieve the required dataframes.
-    - The `urls` dictionary should contain the appropriate URLs for fetching the dataframes.
+    - The `fetch_all_data()` function should be implemented and accessible to retrieve the required dataframes.
 
-    Parameters:
-    - Returns a dataframe with the following columns:
-        - 'patient_id': The ID of the patient associated with the appointment.
+    Returns:
+    - A dataframe with the following columns:
         - 'councillor_id': The ID of the councillor associated with the appointment.
         - 'specialization': The specialization of the councillor.
         - 'value': The rating value associated with the appointment.
-
     """
+
     appointment_df, councillor_df, patient_councillor_df, rating_df = fetch_all_data()
 
     joined_df = (
@@ -55,13 +61,11 @@ def join():
             councillor_df, councillor_df["id"] == patient_councillor_df["councillor_id"]
         )
         .select(
-            # appointment_df["patient_id"],
             councillor_df["id"].alias("councillor_id"),
             councillor_df["specialization"],
             rating_df["value"],
         )
     )
-
     return joined_df
 
 
@@ -73,14 +77,14 @@ def calculate_average():
     within a specialization. The tables are indexed by the specialization name.
 
     Preconditions:
-    - The join() function should be called prior to invoking this function to obtain the joined dataframe.
+    - The `join()` function should be called prior to invoking this function to obtain the joined dataframe.
 
-    Parameters:
-    - Returns a dictionary of DataFrame tables with the following columns:
+    Returns:
+    - A dictionary of DataFrame tables with the following columns:
         - 'councillor_id': The ID of the councillor.
         - 'average_value': The average rating for the councillor within the specialization.
-
     """
+
     joined_df = join()
 
     specializations = joined_df.select("specialization").distinct().collect()
@@ -102,3 +106,12 @@ def calculate_average():
         specialization_tables[specialization] = average_df
 
     return specialization_tables
+
+
+if __name__ == "__main__":
+    specialization_tables = calculate_average()
+
+    for specialization in specialization_tables:
+        df = specialization_tables[specialization]
+        print(f"Specialization: {specialization}")
+        df.show()
