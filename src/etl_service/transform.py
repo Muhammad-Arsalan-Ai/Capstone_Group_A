@@ -34,7 +34,6 @@ def fetch_all_data():
         dataframes[key] = spark.createDataFrame(data)
 
     logger.info("Data received from endpoints")
-    spark.stop()
 
     return dataframes['appointment'], dataframes['councillor'], dataframes['patient_councillor'], dataframes['rating']
 
@@ -118,6 +117,7 @@ def data_transformations():
     json_data = json.dumps({
         specialization: table.toJSON().collect() for specialization, table in specialization_tables.items()
     })
+    spark.stop()
 
     logger.info("Data has been transformed")
     return json_data
