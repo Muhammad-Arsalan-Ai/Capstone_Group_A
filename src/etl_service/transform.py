@@ -2,6 +2,7 @@ from extract import get_api_data, urls
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import json
+from base_logger import logger
 
 def fetch_all_data():
     """
@@ -32,6 +33,8 @@ def fetch_all_data():
         data = get_api_data(url)
         dataframes[key] = spark.createDataFrame(data)
 
+    spark.stop()
+    logger.info("Data received from endpoints")
     return dataframes['appointment'], dataframes['councillor'], dataframes['patient_councillor'], dataframes['rating']
 
 
@@ -115,6 +118,7 @@ def data_transformations():
         specialization: table.toJSON().collect() for specialization, table in specialization_tables.items()
     })
 
+    logger.info("Data has been transformed")
     return json_data
 
 
