@@ -75,7 +75,7 @@ def joined_data():
     return joined_df
 
 
-def calculate_average():
+def data_transformations():
     """
     Calculates the average rating for each councillor in each specialization based on the joined DataFrame.
 
@@ -121,4 +121,4 @@ def calculate_average():
 
 
 if __name__ == "__main__":
-    calculate_average()
+    data_transformations()
