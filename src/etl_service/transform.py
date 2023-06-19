@@ -28,12 +28,12 @@ def fetch_all_data():
     """
     spark = SparkSession.builder.getOrCreate()
 
-    appointment_df = spark.createDataFrame(get_api_data(urls["appointment"]))
-    councillor_df = spark.createDataFrame(get_api_data(urls["councillor"]))
-    patient_councillor_df = spark.createDataFrame(get_api_data(urls["patient_councillor"]))
-    rating_df = spark.createDataFrame(get_api_data(urls["rating"]))
+    dataframes = {}
+    for key, url in urls.items():
+        data = get_api_data(url)
+        dataframes[key] = spark.createDataFrame(data)
 
-    return appointment_df, councillor_df, patient_councillor_df, rating_df
+    return dataframes['appointment'], dataframes['councillor'], dataframes['patient_councillor'], dataframes['rating']
 
 
 def joined_data():
