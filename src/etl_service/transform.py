@@ -18,22 +18,19 @@ def fetch_all_data():
     - The urls dictionary should contain the appropriate API URLs.
 
     """
-    data = {}
-
-    for k, v in urls.items():
-        data[k] = get_api_data(v)
-
     spark = SparkSession.builder.getOrCreate()
 
-    appointment_df = spark.createDataFrame(data["appointment"])
-    councillor_df = spark.createDataFrame(data["councillor"])
-    patient_councillor_df = spark.createDataFrame(data["patient_councillor"])
-    rating_df = spark.createDataFrame(data["rating"])
+    appointment_df = spark.createDataFrame(get_api_data(urls["appointment"]))
+    councillor_df = spark.createDataFrame(get_api_data(urls["councillor"]))
+    patient_councillor_df = spark.createDataFrame(
+        get_api_data(urls["patient_councillor"])
+    )
+    rating_df = spark.createDataFrame(get_api_data(urls["rating"]))
 
     return appointment_df, councillor_df, patient_councillor_df, rating_df
 
 
-def join():
+def joined_data():
     """
     Performs data joining based on appointment, councillor, patient-councillor, and rating dataframes.
 
