@@ -3,7 +3,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import json
 
-
 def fetch_all_data():
     """
     Fetches data from the specified API URLs and returns the corresponding Spark DataFrames.
@@ -73,7 +72,6 @@ def joined_data():
         )
     )
     return joined_df
-
 
 def data_transformations():
     """
