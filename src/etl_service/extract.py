@@ -24,6 +24,5 @@ urls = {
     "rating": f"{os.getenv('BASE_URL')}/rating",
 }
 
-
 if __name__ == "__main__":
     urls = {key: get_api_data(val) for key, val in urls.items()}
