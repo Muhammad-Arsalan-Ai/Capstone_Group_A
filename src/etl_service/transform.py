@@ -1,33 +1,31 @@
+from base_logger import logger
 from extract import get_api_data, urls
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
-import json
-from base_logger import logger
 
-def fetch_all_data():
+
+def fetch_all_data(spark):
     """
     Fetches data from the specified API URLs and returns the corresponding Spark DataFrames.
 
+    Parameters:
+    - spark: SparkSession
+        The SparkSession object used to create the DataFrames.
+
     Returns:
-    - appointment_df: DataFrame
-        DataFrame containing appointment data.
-    - councillor_df: DataFrame
-        DataFrame containing councillor data.
-    - patient_councillor_df: DataFrame
-        DataFrame containing patient-councillor relationship data.
-    - rating_df: DataFrame
-        DataFrame containing rating data.
+    - dict:
+        A dictionary containing the fetched DataFrames. The keys represent the data types, such as 'appointment',
+        'councillor', 'patient_councillor', and 'rating', and the values are the corresponding Spark DataFrames.
 
     Preconditions:
     - The `get_api_data()` function should be implemented to fetch data from the API URLs.
     - The `urls` dictionary should contain the appropriate API URLs.
+    - The `spark` parameter should be a valid SparkSession object.
 
     Returns:
-    - Tuple of DataFrames:
-        The appointment, councillor, patient-councillor, and rating DataFrames retrieved from the API URLs.
+    - dict:
+        A dictionary containing the fetched DataFrames.
     """
-    spark = SparkSession.builder.getOrCreate()
-
     dataframes = {}
     for key, url in urls.items():
         data = get_api_data(url)
@@ -35,30 +33,39 @@ def fetch_all_data():
 
     logger.info("Data received from endpoints")
 
-    return dataframes['appointment'], dataframes['councillor'], dataframes['patient_councillor'], dataframes['rating']
+    return dataframes
 
 
-def joined_data():
+def joined_data(spark):
     """
     Performs data joining based on appointment, councillor, patient-councillor, and rating DataFrames.
 
+    Parameters:
+    - spark: SparkSession
+        The SparkSession object used to access the DataFrames.
+
     Returns:
-    - joined_df: DataFrame
-        Joined DataFrame containing the following columns:
+    - DataFrame:
+        The joined DataFrame containing the following columns:
         - 'councillor_id': The ID of the councillor associated with the appointment.
         - 'specialization': The specialization of the councillor.
         - 'value': The rating value associated with the appointment.
 
     Preconditions:
     - The `fetch_all_data()` function should be implemented and accessible to retrieve the required DataFrames.
+    - The `spark` parameter should be a valid SparkSession object.
 
     Returns:
     - DataFrame:
         The joined DataFrame containing the desired columns.
     """
 
-    appointment_df, councillor_df, patient_councillor_df, rating_df = fetch_all_data()
+    dataframes = fetch_all_data(spark)
 
+    appointment_df = dataframes["appointment"]
+    councillor_df = dataframes["councillor"]
+    patient_councillor_df = dataframes["patient_councillor"]
+    rating_df = dataframes["rating"]
     joined_df = (
         appointment_df.join(
             patient_councillor_df,
@@ -76,25 +83,40 @@ def joined_data():
     )
     return joined_df
 
+
 def data_transformations():
     """
     Calculates the average rating for each councillor in each specialization based on the joined DataFrame.
 
     Returns:
-    - json_data: str
-        JSON representation of the average rating data. The data is a dictionary where each key represents a specialization,
-        and the corresponding value is a list of JSON objects containing the average rating information for each councillor
-        within that specialization.
+    - specialization_tables: dict
+        A dictionary where each key represents a specialization, and the corresponding value is a DataFrame
+        containing the average rating information for each councillor within that specialization.
 
     Preconditions:
     - The `joined_data()` function should be called prior to invoking this function to obtain the joined DataFrame.
 
     Returns:
-    - str:
-        JSON representation of the average rating data.
+    - dict:
+        A dictionary where each key represents a specialization, and the corresponding value is a DataFrame
+        containing the average rating information for each councillor within that specialization.
+
+    Notes:
+    - This function creates and stops a SparkSession internally to perform the necessary transformations. The SparkSession
+      is not expected to be passed as a parameter.
+
+    Example Usage:
+    ```
+    result = data_transformations()
+    for specialization, dataframe in result.items():
+        print(f"Specialization: {specialization}")
+        dataframe.show()
+    ```
     """
 
-    joined_df = joined_data()
+    spark = SparkSession.builder.getOrCreate()
+
+    joined_df = joined_data(spark)
 
     specializations = joined_df.select("specialization").distinct().collect()
 
@@ -114,13 +136,9 @@ def data_transformations():
 
         specialization_tables[specialization] = average_df
 
-    json_data = json.dumps({
-        specialization: table.toJSON().collect() for specialization, table in specialization_tables.items()
-    })
     spark.stop()
-
     logger.info("Data has been transformed")
-    return json_data
+    return specialization_tables
 
 
 if __name__ == "__main__":
