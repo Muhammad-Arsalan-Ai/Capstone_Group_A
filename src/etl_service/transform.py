@@ -128,10 +128,14 @@ def data_transformations():
         filtered_df = joined_df.filter(joined_df["specialization"] == specialization)
 
         average_df = (
-            filtered_df.groupBy("councillor_id")
-            .agg(F.avg("value").alias("average_value"))
-            .orderBy(F.desc("average_value"))
-            .drop("specialization")
+            (
+                filtered_df.groupBy("councillor_id")
+                .agg(F.avg("value").alias("average_value"))
+                .orderBy(F.desc("average_value"))
+                .drop("specialization")
+            )
+            .toJSON()
+            .collect()
         )
 
         specialization_tables[specialization] = average_df
