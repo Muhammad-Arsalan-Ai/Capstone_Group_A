@@ -1,34 +1,14 @@
-# import json
-
-# import redis
-# from transform import data_transformations
-
-# r = redis.Redis(host="localhost", port=6379, decode_responses=True)
-
-# # Calculate the average, group by specialization, and sort by specialization
-# average_df = data_transformations()
-
-# # print(average_df)
-# # Convert the dictionary to a JSON string
-# average_df_json = json.dumps(average_df)
-
-# for key, val in average_df.items():
-#     r.set(key, json.dumps(val))
-# # print(r.get('Depression'))
-
-
-# # # Set the JSON string as the value in Redis
-# # r.set('average_data', average_df_json)
-
-
 import json
 
+import redis  # type: ignore
 from base_logger import logger
 from redis_connector import get_redis_client
 from transform import data_transformations
 
 
-def load_data_to_redis(redis_client, specializations_dfs: dict) -> dict:
+def load_data_to_redis(
+    redis_client: redis.client.Redis, specializations_dfs: dict
+) -> dict:
     """
     Stores specializations_dfs that is given by data_transformations function in Redis,
     using redis_client that is given by get_redis_client function.
@@ -41,7 +21,8 @@ def load_data_to_redis(redis_client, specializations_dfs: dict) -> dict:
 
     Preconditions:
     - The `data_transformations()` function should be called before load_data_to_redis to get data from transform.py
-    - The `get_redis_client()` function should be called before load_data_to_redis to get redis_client from redis_connector.py
+    - The `get_redis_client()` function should be called before load_data_to_redis to get redis_client from
+      redis_connector.py
 
     Returns:
     dict: The same input dictionary of specializations dataframes.

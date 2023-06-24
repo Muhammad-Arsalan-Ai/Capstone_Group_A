@@ -1,10 +1,10 @@
 from base_logger import logger
 from extract import get_api_data, urls
-from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql import functions as F
 
 
-def fetch_all_data(spark):
+def fetch_all_data(spark: SparkSession) -> dict:
     """
     Fetches data from the specified API URLs and returns the corresponding Spark DataFrames.
 
@@ -36,7 +36,7 @@ def fetch_all_data(spark):
     return dataframes
 
 
-def joined_data(spark):
+def joined_data(spark: SparkSession) -> DataFrame:
     """
     Performs data joining based on appointment, councillor, patient-councillor, and rating DataFrames.
 
@@ -84,7 +84,7 @@ def joined_data(spark):
     return joined_df
 
 
-def data_transformations():
+def data_transformations() -> dict:
     """
     Calculates the average rating for each councillor in each specialization based on the joined DataFrame.
 
@@ -102,8 +102,8 @@ def data_transformations():
         containing the average rating information for each councillor within that specialization.
 
     Notes:
-    - This function creates and stops a SparkSession internally to perform the necessary transformations. The SparkSession
-      is not expected to be passed as a parameter.
+    - This function creates and stops a SparkSession internally to perform the necessary transformations.
+      The SparkSession is not expected to be passed as a parameter.
 
     Example Usage:
     ```
