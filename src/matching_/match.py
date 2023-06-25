@@ -1,7 +1,11 @@
 import requests # type: ignore
 import json # type: ignore
+import os # type: ignore
 from redis_connector import get_redis_client
 from base_logger import logger
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def fetch_report_category(report_id: int):
     
@@ -20,7 +24,7 @@ def fetch_report_category(report_id: int):
     - If the response status code is 200, the category is extracted from the response JSON and returned.
     - If the response status code is not 200, an error message is logged, and an exception is raised.
     """
-    api_url = f"https://xloop-dummy.herokuapp.com/report/{report_id}"
+    api_url = f"{os.getenv('BASE_URL')}/report/{report_id}"
     response = requests.get(api_url)
     
     if response.status_code == 200:
