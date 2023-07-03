@@ -1,1 +1,2 @@
-# Capstone_Group_A
+# Group_A
+Project

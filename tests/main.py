@@ -1,6 +1,6 @@
-import uvicorn
+import uvicorn  # type: ignore
 from fastapi import FastAPI
-from match import matching_councillors
+from matching import matching_councillors
 
 app = FastAPI()
 
