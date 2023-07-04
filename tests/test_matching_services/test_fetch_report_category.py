@@ -4,11 +4,12 @@ import unittest  # type: ignore
 from unittest.mock import MagicMock, Mock, patch
 
 import requests  # type: ignore
-from matching import get_report_category, matching_councillors
+
+from src.matching_service.matching import get_report_category, matching_councillors
 
 
 class TestCouncillors(unittest.TestCase):
-    @patch("requests.get")
+    @patch("src.matching_service.matching.requests.get")
     def test_get_report_category_success(self, mock_get: MagicMock) -> None:
         report_id = 123
         category = "Some Category"
@@ -23,7 +24,7 @@ class TestCouncillors(unittest.TestCase):
         mock_get.assert_called_once_with(f"{os.getenv('BASE_URL')}/report/{report_id}")
         self.assertEqual(result, category)
 
-    @patch("requests.get")
+    @patch("src.matching_service.matching.requests.get")
     def test_get_report_category_http_error(self, mock_get: MagicMock) -> None:
         report_id = 123
 
@@ -36,8 +37,8 @@ class TestCouncillors(unittest.TestCase):
 
         mock_get.assert_called_once_with(f"{os.getenv('BASE_URL')}/report/{report_id}")
 
-    @patch("matching.get_report_category")
-    @patch("matching.get_redis_client")
+    @patch("src.matching_service.matching.get_report_category")
+    @patch("src.matching_service.matching.get_redis_client")
     def test_matching_councillors(
         self, mock_get_redis_client: MagicMock, mock_get_report_category: MagicMock
     ) -> None:

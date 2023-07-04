@@ -4,7 +4,8 @@ from unittest.mock import Mock
 import pyspark  # type: ignore
 from pyspark.sql import SparkSession
 from pyspark.sql.types import DoubleType, StringType, StructField, StructType
-from transform import data_transformations, fetch_all_data
+
+from src.etl_service.transform import data_transformations, fetch_all_data
 
 
 class TestDataFetching(unittest.TestCase):

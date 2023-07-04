@@ -2,9 +2,10 @@ import json
 import os
 
 import requests  # type: ignore
-from base_logger import logger
 from dotenv import load_dotenv
-from redis_connector import get_redis_client
+
+from src.matching_service.base_logger import logger
+from src.matching_service.redis_connector import get_redis_client
 
 load_dotenv()
 
@@ -46,7 +47,7 @@ def matching_councillors(report_id: int, number_of_councillors: int = 15) -> lis
     """
     report_category = get_report_category(report_id)
     councillors_with_ratings = json.loads(
-        get_redis_client().get(report_category).decode()
+        get_redis_client().get(report_category).encode()
     )
     top_councillors = [
         json.loads(item) for item in councillors_with_ratings[:number_of_councillors]

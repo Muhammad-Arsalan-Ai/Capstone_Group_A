@@ -2,14 +2,15 @@ import unittest  # type: ignore
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
-from main import app
+
+from src.matching_service.main import app
 
 
 class TestCouncillorsAPI(unittest.TestCase):
     def setUp(self) -> None:
         self.client = TestClient(app)
 
-    @patch("main.matching_councillors")
+    @patch("src.matching_service.main.matching_councillors")
     def test_get_councillors(self, mock_matching_councillors: MagicMock) -> None:
         report_id = 123
 
@@ -24,7 +25,7 @@ class TestCouncillorsAPI(unittest.TestCase):
 
         mock_matching_councillors.assert_called_once_with(report_id)
 
-    @patch("main.matching_councillors")
+    @patch("src.matching_service.main.matching_councillors")
     def test_get_specific_councillors(
         self, mock_matching_councillors: MagicMock
     ) -> None:
@@ -50,7 +51,7 @@ class TestCouncillorsAPI(unittest.TestCase):
             report_id, number_of_councillors
         )
 
-    @patch("main.matching_councillors")
+    @patch("src.matching_service.main.matching_councillors")
     def test_get_specific_councillors_default_number(
         self, mock_matching_councillors: MagicMock
     ) -> None:

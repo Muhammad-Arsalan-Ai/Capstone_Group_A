@@ -1,12 +1,13 @@
 import unittest  # type: ignore
 from unittest.mock import MagicMock, patch
 
-from extract import get_api_data
 from requests import HTTPError  # type: ignore
+
+from src.etl_service.extract import get_api_data
 
 
 class TestGetApiData(unittest.TestCase):
-    @patch("extract.requests.get")
+    @patch("src.etl_service.extract.requests.get")
     def test_get_api_data_success(self, mock_get: MagicMock) -> None:
         url = "https://example.com/api"
         expected_data = {"key": "value"}
@@ -23,7 +24,7 @@ class TestGetApiData(unittest.TestCase):
         mock_response.raise_for_status.assert_called_once()
         mock_response.json.assert_called_once()
 
-    @patch("extract.requests.get")
+    @patch("src.etl_service.extract.requests.get")
     def test_get_api_data_http_error(self, mock_get: MagicMock) -> None:
         url = "https://xloop-dummy.herokuapp.com"
 
