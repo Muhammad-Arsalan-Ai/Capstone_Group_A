@@ -142,8 +142,6 @@ def data_transformations() -> dict:
 
     spark.stop()
     logger.info("Data has been transformed")
-    print(filtered_df.toJSON().collect())
-
     return specialization_tables
 
 
