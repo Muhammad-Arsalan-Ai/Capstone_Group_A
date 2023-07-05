@@ -1,10 +1,11 @@
-import json
-import os
+import json  # type: ignore
+import os  # type: ignore
 
 import requests  # type: ignore
-from base_logger import logger
 from dotenv import load_dotenv
-from redis_connector import get_redis_client
+
+from src.matching_service.base_logger import logger
+from src.matching_service.redis_connector import get_redis_client
 
 load_dotenv()
 

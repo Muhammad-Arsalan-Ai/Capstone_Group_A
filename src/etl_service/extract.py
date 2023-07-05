@@ -1,4 +1,4 @@
-import os
+import os  # type: ignore
 
 import requests  # type: ignore
 from base_logger import logger
