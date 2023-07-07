@@ -2,10 +2,10 @@
 FROM python:latest
 
 # Working Dir
-WORKDIR /home/etl_service/
+WORKDIR /home/src/etl_service/
 
 # Copy files
-COPY . /home/etl_service/
+COPY . .
 
 # Update package lists
 RUN apt-get update
