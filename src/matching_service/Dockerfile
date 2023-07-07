@@ -2,7 +2,10 @@
 FROM python:latest
 
 # Working dir
-WORKDIR /home/matching_service/
+RUN mkdir /src
+RUN mkdir /src/matching_service
+RUN touch /src/__init__.py
+COPY . /src/matching_service
 
 # Copy requirements.txt
 COPY ./requirements.txt ./

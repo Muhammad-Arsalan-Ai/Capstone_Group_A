@@ -1,8 +1,9 @@
 import os  # type: ignore
 
 import requests  # type: ignore
-from base_logger import logger
 from dotenv import load_dotenv
+
+from src.etl_service.base_logger import logger
 
 load_dotenv()
 

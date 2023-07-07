@@ -1,45 +1,71 @@
-import unittest  # type: ignore
-from unittest.mock import MagicMock, patch
+import json
+import os
+import unittest
+from unittest.mock import Mock, patch
 
-from requests import HTTPError  # type: ignore
+import requests  # type: ignore
 
 from src.etl_service.extract import get_api_data
 
+urls = {
+    "appointment": f"{os.getenv('BASE_URL')}/appointment",
+    "councillor": f"{os.getenv('BASE_URL')}/councillor",
+    "patient_councillor": f"{os.getenv('BASE_URL')}/patient_councillor",
+    "rating": f"{os.getenv('BASE_URL')}/rating",
+}
+
 
 class TestGetApiData(unittest.TestCase):
-    @patch("src.etl_service.extract.requests.get")
-    def test_get_api_data_success(self, mock_get: MagicMock) -> None:
-        url = "https://example.com/api"
-        expected_data = {"key": "value"}
+    def test_get_api_data(self):
+        # Mock the requests.get function
+        requests.get = Mock()
 
-        mock_response = MagicMock()
-        mock_response.raise_for_status.return_value = None
-        mock_response.json.return_value = expected_data
-        mock_get.return_value = mock_response
+        # Define the mock response object
+        mock_response = Mock()
+        mock_response.json.return_value = {"key": "value"}
+        mock_response.status_code = 200
 
-        result = get_api_data(url)
+        # Set the mock response for requests.get
+        requests.get.return_value = mock_response
 
-        self.assertEqual(result, expected_data)
-        mock_get.assert_called_once_with(url)
+        # Call the function to be tested
+        result = get_api_data(urls)
+
+        # Assertions
+        requests.get.assert_called_once_with(urls)
         mock_response.raise_for_status.assert_called_once()
-        mock_response.json.assert_called_once()
+        self.assertEqual(result, {"key": "value"})
 
-    @patch("src.etl_service.extract.requests.get")
-    def test_get_api_data_http_error(self, mock_get: MagicMock) -> None:
-        url = "https://xloop-dummy.herokuapp.com"
+    @patch("requests.get")
+    def test_get_api_data_404_error(self, mock_request_get):
+        response = requests.Response()
+        response.status_code = 404
+        mock_request_get.return_value = response
 
-        mock_response = MagicMock()
-        mock_response.raise_for_status.side_effect = HTTPError("404 Not Found")
-        mock_response.status_code = 404  # Set the status code manually
-        mock_get.return_value = mock_response
+        with self.assertRaises(requests.exceptions.HTTPError) as context:
+            get_api_data(urls)
 
-        with self.assertRaises(HTTPError) as cm:
-            get_api_data(url)
+        # Assertions
+        requests.get.assert_called_once_with(urls)
+        self.assertIn(
+            "404 Client Error",
+            str(context.exception),
+        )
 
-        self.assertEqual(str(cm.exception), "404 Not Found")
-        mock_get.assert_called_once_with(url)
-        mock_response.raise_for_status.assert_called_once()
-        mock_response.json.assert_not_called()
+    @patch("requests.get")
+    def test_api_all_requests_successful(self, mock_request_get):
+        return_json = {
+            "test_key": "test_value",
+        }
+        response = requests.Response()
+        response.status_code = 200
+        response._content = json.dumps(return_json).encode("utf-8")
+        mock_request_get.return_value = response
+
+        response_data = get_api_data(urls)
+
+        mock_request_get.assert_called_once_with(urls)
+        self.assertEqual(response_data, return_json)
 
 
 if __name__ == "__main__":
