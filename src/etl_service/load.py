@@ -1,9 +1,10 @@
 import json
 
 import redis  # type: ignore
-from base_logger import logger
-from redis_connector import get_redis_client
-from transform import data_transformations
+
+from src.etl_service.base_logger import logger
+from src.etl_service.redis_connector import get_redis_client
+from src.etl_service.transform import data_transformations
 
 
 def load_data_to_redis(

@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
-from matching import matching_councillors
+
+from src.matching_service.matching import matching_councillors
 
 app = FastAPI()
 
