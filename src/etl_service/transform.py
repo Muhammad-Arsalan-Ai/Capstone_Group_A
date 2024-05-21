@@ -1,7 +1,8 @@
-from base_logger import logger
-from extract import get_api_data, urls
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql import functions as F
+
+from src.etl_service.base_logger import logger
+from src.etl_service.extract import get_api_data, urls
 
 
 def fetch_all_data(spark: SparkSession) -> dict:
